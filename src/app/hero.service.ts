@@ -4,7 +4,6 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { Hero } from './hero';
-import { HEROES } from './mock-heroes';
 import { MessageService } from './message.service';
 
 @Injectable({
@@ -36,13 +35,18 @@ export class HeroService {
   }
 
   getHeroes(): Observable<Hero[]> {
-    return  this.http.get<Hero[]>(this.heroesUrl)
+    return this.http.get<Hero[]>(this.heroesUrl)
     .pipe(
+      tap(_ => this.log('Fetched heroes')),
       catchError(this.handleError<Hero[]>('getHeroes', []))
     );
   }
 
   getHero(id: number): Observable<Hero> {
-    return of(HEROES.find(hero => hero.id === id));
+    const url = `${this.heroesUrl}/${id}`;
+    return this.http.get<Hero>(url).pipe(
+      tap(_ => this.log(`Fetched hero id = ${id}`)),
+      catchError(this.handleError<Hero>(`getHero id=${id}`))
+    );
   }
 }
